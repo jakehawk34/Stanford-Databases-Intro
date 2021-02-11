@@ -52,11 +52,26 @@ WHERE L1.ID2 NOT IN (SELECT ID1 FROM Likes);
 
 /* 6. Find names and grades of students who only have friends in the same grade. 
 Return the result sorted by grade, then by name within each grade. */
+SELECT HS1.name, HS1.grade 
+FROM Highschooler HS1
+WHERE ID NOT IN (
+	SELECT ID1
+	FROM Friend, Highschooler HS2
+	WHERE HS1.ID = Friend.ID1 AND HS2.ID = Friend.ID2 
+	AND HS1.grade <> HS2.grade)
+ORDER BY HS1.grade, HS1.name;
 
 /* 7. For each student A who likes a student B where the two are not friends, 
 find if they have a friend C in common (who can introduce them!). 
 For all such trios, return the name and grade of A, B, and C. */
-
+SELECT DISTINCT HS1.name, HS1.grade, HS2.name, HS2.grade, HS3.name, HS3.grade
+FROM Highschooler HS1, Highschooler HS2, Highschooler HS3
+JOIN Likes ON HS1.ID = Likes.ID1
+JOIN Friend ON HS1.ID = Friend.ID1
+WHERE HS1.ID = Likes.ID1 AND HS2.ID=Likes.ID2
+AND HS2.ID NOT IN (SELECT ID2 FROM Friend WHERE ID1 = HS1.ID)
+AND HS1.ID IN (SELECT ID2 FROM Friend WHERE ID1 = HS3.ID)
+AND HS2.ID IN (SELECT ID2 FROM Friend WHERE ID1 = HS3.ID);
 
 /* 8. Find the difference between the number of students in the school and the number of different first names. */
 SELECT COUNT(ID) - COUNT(DISTINCT name)
